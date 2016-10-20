@@ -51,11 +51,10 @@ compressors and CPU-GPU transfer plugins.
 
         virtual const Results& compress( const void* const data,
                                          const size_t size ) = 0;
-        virtual const Result& decompress( const Results& input,
-                                          const size_t size ) = 0;
+        virtual void decompress( const Results& input, const void* data
+                                 const size_t size ) = 0;
     protected:
         Results compressed;
-        Result uncompressed;
     };
 
 
@@ -96,9 +95,8 @@ Compressor implementation:
     {
     static const bool LB_UNUSED _initialized = []()
     {
-        PluginRegistry::registerEngine( { "pression::CompressorZSTD",
-                                         .47f, .25f },
-                                        CompressorZSTD::newInstance );
+        PluginRegistry::registerEngine< CompressorZSTD >(
+            { "pression::CompressorZSTD", .47f, .25f });
         return true;
     }();
     }
@@ -117,15 +115,13 @@ Compressor implementation:
         return results;
     }
 
-    const Result& CompressorZSTD::decompress( const Results& input,
-                                              const size_t size );
+    void CompressorZSTD::decompress( const Results& input, const void* data,
+                                     const size_t size )
     {
         if( input.empty( ))
             return;
 
-        _result.resize( size );
-        ZSTD_decompress( _result.getData(), _result.getSize(),
-                         input[0].getData(), input[0].getSize( ));
+        ZSTD_decompress( data, size, input[0].getData(), input[0].getSize( ));
     }
     }
     }
