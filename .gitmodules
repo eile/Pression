@@ -4,3 +4,6 @@
 [submodule "pression/data/snappy"]
 	path = pression/data/snappy
 	url = https://github.com/google/snappy
+[submodule "pression/data/zfp"]
+	path = pression/data/zfp
+	url = https://github.com/LLNL/zfp
