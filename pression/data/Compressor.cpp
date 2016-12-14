@@ -21,37 +21,54 @@
 
 #include <algorithm>
 #include <stdexcept>
+#ifdef PRESSION_USE_OPENMP
+#  include <omp.h>
+#endif
 
 namespace pression
 {
 namespace data
 {
+namespace
+{
+const size_t PAGESIZE = LB_4KB;
+const size_t PAGESIZE_2 = (PAGESIZE >> 1);
+
+size_t _getClosestPageSize( size_t position, const size_t maxSize )
+{
+    const size_t pageNumber = (position + PAGESIZE_2) / PAGESIZE;
+    position = pageNumber * PAGESIZE;
+    return std::min( position, maxSize );
+}
+}
 
 Compressor::~Compressor()
 {
     if( _in > 0 )
         LBDEBUG << _in << " -> " << _out << " ("
-                << int( float(_out) / float(_in) * 100.f ) << "%) " <<std::endl;
+                << int( float(_out) / float(_in) * 100.f ) << "%) " << std::endl;
 }
 
 const Compressor::Results& Compressor::compress( const uint8_t* data,
                                                  size_t size )
 {
 #ifdef PRESSION_USE_OPENMP
-    const size_t chunkSize = getChunkSize();
-    const size_t nChunks = (size + chunkSize - 1) / chunkSize;
+    const size_t nPages = (size + PAGESIZE - 1) / PAGESIZE;
+    const size_t nChunks = std::min< size_t >( nPages,
+                                               4 * ::omp_get_num_procs( ));
+    const size_t chunkSize = (size + PAGESIZE_2 ) / nChunks;
 
     compressed.resize( nChunks );
-
 #pragma omp parallel for
-    for( int i = 0; i < int(nChunks); ++i )
+    for( ssize_t i = 0; i < ssize_t(size); i += chunkSize )
     {
-        const size_t start = i * chunkSize;
-        const size_t end = std::min( (i+1) * chunkSize, size );
+        const size_t start = _getClosestPageSize( i, size );
+        const size_t end = _getClosestPageSize( i + chunkSize, size );
         const size_t nBytes = end - start;
+        const size_t index = i / chunkSize;
 
-        compressed[i].reserve( getCompressBound( nBytes ));
-        compressChunk( data + start, nBytes, compressed[i] );
+        compressed[index].reserve( getCompressBound( nBytes ));
+        compressChunk( data + start, nBytes, compressed[index] );
     }
 #else
     compressed.resize( 1 );
@@ -91,25 +108,20 @@ void Compressor::decompress(
         return;
     }
 
-    const size_t chunkSize = getChunkSize();
-    if( size/chunkSize != inputs.size() && size/chunkSize + 1 != inputs.size( ))
-    {
-        LBTHROW(
-            std::runtime_error( "Chunk size of " + std::to_string( chunkSize ) +
-                                " not consistent with " +
-                                std::to_string( inputs.size( )) +
-                                " input chunks for " + std::to_string( size ) +
-                                " bytes" ));
-    }
+    const size_t nPages = (size + PAGESIZE - 1) / PAGESIZE;
+    const size_t nChunks = std::min< size_t >( nPages,
+                                               4 * ::omp_get_num_procs( ));
+    const size_t chunkSize = (size + PAGESIZE_2 ) / nChunks;
 
 #pragma omp parallel for
-    for( int i = 0; i < int(inputs.size( )); ++i )
+    for( ssize_t i = 0; i < ssize_t(size); i += chunkSize )
     {
-        const size_t start = i * chunkSize;
-        const size_t end = std::min( (i+1) * chunkSize, size );
+        size_t start = _getClosestPageSize( i, size );
+        size_t end = _getClosestPageSize( i + chunkSize, size );
         const size_t nBytes = end - start;
+        const size_t index = i / chunkSize;
 
-        decompressChunk( inputs[i].first, inputs[i].second,
+        decompressChunk( inputs[index].first, inputs[index].second,
                          data + start, nBytes );
     }
 }
