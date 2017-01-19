@@ -34,7 +34,7 @@ class Decompressor;
 /**
  * A C++ class to handle one decompressor plugin instance.
  *
- * Example: @include tests/compressor.cpp
+ * Example: @include tests/perf/dataCompressor.cpp
  */
 class Decompressor
 {

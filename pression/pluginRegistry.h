@@ -41,7 +41,7 @@ class PluginRegistry;
  * global plugin registry in their respective initialization calls by loading
  * directories or files.
  *
- * Example: @include tests/compressor.cpp
+ * Example: @include tests/perf/dataCompressor.cpp
  */
 class PluginRegistry
 {

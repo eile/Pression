@@ -37,7 +37,7 @@ class Plugin;
 /**
  * Holder for all functions and information of one compression plugin DSO.
  *
- * Example: @include tests/compressor.cpp
+ * Example: @include tests/perf/dataCompressor.cpp
  */
 class Plugin : public lunchbox::DSO
 {

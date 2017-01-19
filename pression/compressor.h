@@ -35,7 +35,7 @@ class Compressor;
 /**
  * A C++ class to handle one compressor plugin instance.
  *
- * Example: @include tests/compressor.cpp
+ * Example: @include tests/perf/dataCompressor.cpp
  */
 class Compressor
 {
