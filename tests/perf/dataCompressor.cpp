@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2010-2016, Cedric Stalder <cedric.stalder@gmail.com>
+/* Copyright (c) 2010-2017, Cedric Stalder <cedric.stalder@gmail.com>
  *                          Stefan Eilemann <eile@eyescale.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
@@ -23,10 +23,11 @@
 #include <pression/data/Registry.h>
 
 #include <lunchbox/buffer.h>
-#include <lunchbox/clock.h>
 #include <lunchbox/file.h>
 #include <lunchbox/memoryMap.h>
 #include <lunchbox/rng.h>
+
+#include <extra/Clock.h>
 
 #include <algorithm>
 #include <boost/program_options.hpp>
@@ -73,7 +74,7 @@ void _testData(const pression::data::CompressorInfo& info,
     std::unique_ptr<pression::data::Compressor> compressor(info.create());
 
     compressor->compress(data, size);
-    lunchbox::Clock clock;
+    extra::Clock clock;
     const auto& compressed = compressor->compress(data, size);
     const float compressTime = clock.getTimef();
 

@@ -1,10 +1,10 @@
-# Copyright (c) 2016, Stefan.Eilemann@epfl.ch
+# Copyright (c) 2016-2017, Stefan.Eilemann@epfl.ch
 #
 # Change this number when adding tests to force a CMake run: 0
 
 include(InstallFiles)
 
-set(TEST_LIBRARIES PressionData ${Boost_PROGRAM_OPTIONS_LIBRARY})
+set(TEST_LIBRARIES Extra PressionData ${Boost_PROGRAM_OPTIONS_LIBRARY})
 add_definitions(-DBOOST_PROGRAM_OPTIONS_DYN_LINK) # Fix for windows and shared boost.
 
 include(CommonCTest)
