@@ -4,3 +4,6 @@
 [submodule "pression/data/snappy"]
 	path = pression/data/snappy
 	url = https://github.com/google/snappy
+[submodule "pression/data/marlin"]
+	path = pression/data/marlin
+	url = https://github.com/MartinezTorres/marlin.git

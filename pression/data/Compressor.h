@@ -92,6 +92,7 @@ protected:
         , _out(0)
     {
     }
+
     Compressor(const Compressor&) = delete;
     Compressor(Compressor&&) = delete;
     Compressor& operator=(const Compressor&) = delete;

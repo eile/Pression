@@ -19,6 +19,16 @@ set(SNAPPY_SOURCES
   snappy/snappy-sinksource.cc
 )
 
+if(OpenCV_FOUND)
+  list(APPEND PRESSIONDATA_PUBLIC_HEADERS CompressorMarlin.h)
+  set(MARLIN_SOURCES
+    CompressorMarlin.cpp
+    marlin/src/codecs/rle.cc
+    marlin/src/codecs/marlin.cc
+    marlin/src/codecs/nibble.cc
+    marlin/src/codecs/rice.cc)
+endif()
+
 set(ac_cv_have_stdint_h 1)
 set(ac_cv_have_stddef_h 1)
 set(ac_cv_have_sys_uio_h 0)
@@ -36,10 +46,12 @@ endif()
 
 if(CMAKE_COMPILER_IS_GCC OR CMAKE_COMPILER_IS_CLANG)
   set_source_files_properties(${SNAPPY_SOURCES} PROPERTIES COMPILE_FLAGS
-    "-Wno-unused-parameter -Wno-header-hygiene -Wno-sign-compare")
+  "-Wno-unused-parameter -Wno-header-hygiene -Wno-sign-compare")
+  set_source_files_properties(${MARLIN_SOURCES} PROPERTIES COMPILE_FLAGS
+  "-Wno-non-virtual-dtor -Wno-shadow -Wno-constexpr-not-const")
 elseif(MSVC)
-  set_source_files_properties(${SNAPPY_SOURCES} PROPERTIES COMPILE_FLAGS
-    "/w")
+  set_source_files_properties(${SNAPPY_SOURCES} ${MARLIN_SOURCES} PROPERTIES
+    COMPILE_FLAGS "/w")
 endif()
 
 set(PRESSIONDATA_COMPRESSORS
@@ -53,6 +65,7 @@ set(PRESSIONDATA_COMPRESSORS
   liblzf/lzf.h
   liblzf/lzf_c.c
   liblzf/lzf_d.c
+  ${MARLIN_SOURCES}
   ${SNAPPY_SOURCES}
   zstd/lib/common/entropy_common.c
   zstd/lib/common/fse_decompress.c
@@ -75,7 +88,7 @@ set(PRESSIONDATA_SOURCES
   Registry.cpp
 )
 
-include_directories(zstd/lib zstd/lib/common)
+include_directories(zstd/lib zstd/lib/common marlin/src)
 set(PRESSIONDATA_LINK_LIBRARIES PUBLIC Lunchbox)
 
 add_definitions( -DHAVE_BYTESWAP_H)
